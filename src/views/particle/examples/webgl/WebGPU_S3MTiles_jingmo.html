@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>CBD</title>
+    <link href="../../Build/SuperMap3D/Widgets/widgets.css" rel="stylesheet">
+    <script src="./js/config.js"></script>
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../Build/SuperMap3D/SuperMap3D.js"></script>
+</head>
+<body>
+<div id="Container"></div>
+<script type="text/javascript">
+    function onload(SuperMap3D) {
+        // 通过config.js中的getEngineType,获取引擎类型（EngineType）用于设置启动方式
+        var EngineType = getEngineType(); 
+        var viewer = new SuperMap3D.Viewer('Container',{
+            contextOptions: {
+                contextType: Number(EngineType), // Webgl2:2 ; WebGPU:3
+            }
+        });
+        viewer.resolutionScale = window.devicePixelRatio;
+        viewer.scenePromise.then(function(scene){
+            init(SuperMap3D, scene, viewer);
+        });
+    }
+    function init(SuperMap3D, scene, viewer){
+        scene.shadowMap.darkness = 1.275; //设置第二重烘焙纹理的效果（明暗程度）
+        
+        scene.debugShowFramesPerSecond = false;
+        scene.hdrEnabled = false;
+        scene.sun.show = true;
+        // 01设置环境光的强度-新处理CBD场景
+        scene.lightSource.ambientLightColor = new SuperMap3D.Color(0.65, 0.65, 0.65, 1);
+        // 添加光源
+        var position1 = new SuperMap3D.Cartesian3.fromDegrees(116.261209157595,  39.3042238956531, 480);
+        //光源方向点
+
+        var targetPosition1 = new SuperMap3D.Cartesian3.fromDegrees(116.261209157595, 39.3042238956531,430);
+        var dirLightOptions = {
+            targetPosition: targetPosition1,
+            color: new SuperMap3D.Color(1.0, 1.0, 1.0, 1),
+            intensity: 0.55
+        };
+        directionalLight_1 = new SuperMap3D.DirectionalLight(position1, dirLightOptions);
+        scene.addLightSource(directionalLight_1);
+        var widget = viewer.Widget;
+        try{
+            var promise = scene.open('http://www.supermapol.com/realspace/services/3D-CBDCache20200416-2/rest/realspace');
+            SuperMap3D.when(promise,function(layer){
+            },function(e){
+                if (widget._showRenderLoopErrors) {
+                    var title = '加载SCP失败，请检查网络连接状态或者url地址是否正确？';
+                    widget.showErrorPanel(title, undefined, e);
+                }
+            });
+        }
+        catch(e){
+            if (widget._showRenderLoopErrors) {
+                var title = '渲染时发生错误，已停止渲染。';
+                widget.showErrorPanel(title, undefined, e);
+            }
+        }
+    }
+    if (typeof SuperMap3D !== 'undefined') {
+        window.startupCalled = true;
+        onload(SuperMap3D);
+    }
+</script>
+</body>
+</html>

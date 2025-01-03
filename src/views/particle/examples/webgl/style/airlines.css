@@ -1,0 +1,10 @@
+#info{
+    position: absolute;
+    left: 47%;
+    bottom: 2%;
+    color: wheat;
+    font:15px Arial;
+}
+.bootstrap-select {
+    width: 100px;
+}

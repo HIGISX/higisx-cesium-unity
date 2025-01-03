@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>模型编辑（旋转、平移、缩放）</title>
+    <link href="../../Build/SuperMap3D/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <link href="./style/KML_edit.css" rel="stylesheet">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script src="./js/slider.js"></script>
+    <script type="text/javascript" src="./js/saveKml.js"></script>
+    <script type="text/javascript" src="./js/sweetalert-dev.js"></script>
+    <link rel="stylesheet" href="./css/sweetalert.css">
+    <script src="./js/config.js"></script>
+    <script type="text/javascript" src="../../Build/SuperMap3D/SuperMap3D.js"></script>
+</head>
+
+<body>
+    <div id="Container"></div>
+    <div id='loadingbar' class="spinner">
+        <div class="spinner-container container1">
+            <div class="circle1"></div>
+            <div class="circle2"></div>
+            <div class="circle3"></div>
+            <div class="circle4"></div>
+        </div>
+        <div class="spinner-container container2">
+            <div class="circle1"></div>
+            <div class="circle2"></div>
+            <div class="circle3"></div>
+            <div class="circle4"></div>
+        </div>
+        <div class="spinner-container container3">
+            <div class="circle1"></div>
+            <div class="circle2"></div>
+            <div class="circle3"></div>
+            <div class="circle4"></div>
+        </div>
+    </div>
+    <div id="toolbar" class="param-container tool-bar">
+        <div style="margin: 10px 0px;">
+            <b>改变位置</b>
+            <input type="range" id="changePosition" min="0" max="13" value="0">
+        </div>
+        <div style="margin: 10px 0px;">
+            <b>旋转角度</b>
+            <input type="range" id="rotate" min="0" max="60" value="38">
+        </div>
+        <div style="margin: 10px 0px;">
+            <b>模型大小</b>
+            <input type="range" id="setSize" min="1" max="8" value="0">
+        </div>
+    </div>
+    <script>
+        function onload(SuperMap3D) {
+            // 通过config.js中的getEngineType,获取引擎类型（EngineType）用于设置启动方式
+            var EngineType = getEngineType();
+            var viewer = new SuperMap3D.Viewer('Container', {
+                shouldAnimate: true,
+                contextOptions: {
+                    contextType: Number(EngineType), // Webgl2:2 ; WebGPU:3
+                }
+            });
+
+            viewer.scenePromise.then(function (scene) {
+                init(SuperMap3D, scene, viewer);
+            });
+        }
+        function init(SuperMap3D, scene, viewer) {
+            viewer.imageryLayers.addImageryProvider(new SuperMap3D.BingMapsImageryProvider({
+                url: 'https://dev.virtualearth.net',
+                mapStyle: SuperMap3D.BingMapsStyle.AERIAL,
+                key: URL_CONFIG.BING_MAP_KEY//当场景出现黑球时可至官网（https://www.bingmapsportal.com/）申请key
+            }));
+            viewer.resolutionScale = window.devicePixelRatio;
+
+            scene.lightSource.ambientLightColor = new SuperMap3D.Color(0.65, 0.65, 0.65, 1);
+            var widget = viewer.Widget;
+            var nodeAnimationFlag = false;
+            try {
+                //添加S3M图层服务
+                var promise = scene.open(URL_CONFIG.SCENE_JINJIANG2);
+                SuperMap3D.when(promise, function (layers) {
+                    viewer.scene.camera.setView({
+                        destination: new SuperMap3D.Cartesian3(-2768530.0785199646, 5088886.5198286865, 2659403.2721356247),
+                        orientation: {
+                            heading: 3.836925903232255,
+                            pitch: -0.35141268551663174,
+                            roll: 0.0035480416143034432
+                        }
+                    });
+                    function createNodeAnimatinModel(line) {
+                        var length = line._actualPositions.length;
+                        var start = SuperMap3D.JulianDate.fromDate(new Date());
+                        var stop = SuperMap3D.JulianDate.addSeconds(start, length * 10, new SuperMap3D.JulianDate());
+                        viewer.clock.startTime = start.clone();
+                        viewer.clock.stopTime = stop.clone();
+                        viewer.clock.currentTime = start.clone();
+
+                        viewer.clock.multiplier = 2.5;
+                        var position = computeCirclularFlight(line, start, stop);
+
+                        if (typeof nodeAnimationModel !== "undefined") {
+                            nodeAnimationModel.show = true;
+                            nodeAnimationModel.availability = new SuperMap3D.TimeIntervalCollection([new SuperMap3D.TimeInterval({
+                                start: start,
+                                stop: stop
+                            })]);
+                            nodeAnimationModel.position = position;
+                            nodeAnimationModel.orientation = new SuperMap3D.VelocityOrientationProperty(position);
+                        }
+                        else {
+                            nodeAnimationModel = viewer.entities.add({
+                                availability: new SuperMap3D.TimeIntervalCollection([new SuperMap3D.TimeInterval({
+                                    start: start,
+                                    stop: stop
+                                })]),
+                                position: position,
+                                orientation: new SuperMap3D.VelocityOrientationProperty(position),
+                                model: {
+                                    uri: './SampleData/models/car.gltf',
+                                    minimumPixelSize: 16,
+                                    maximumScale: 16
+                                }
+                            });
+                        }
+                    }
+
+                    viewer.dataSources.removeAll();
+                    viewer.dataSources.add(SuperMap3D.KmlDataSource.load('./SampleData/kml/model.kml', {
+                        camera: viewer.scene.camera,
+                        canvas: viewer.scene.canvas
+                    })).then(function (dataSource) {
+                        viewer.clock.clockRange = SuperMap3D.ClockRange.CLAMPED;
+                    });
+
+                    function nodeAnimation() {
+                        var picDiv = document.getElementById("picNodeAnimation");
+                        if (!nodeAnimationFlag) {
+                            if (typeof lineHandler === "undefined") {
+                                lineHandler = new SuperMap3D.PolylineHandler(scene);
+                                lineHandler.drawCompletedEvent.addEventListener(function (line) {
+                                    createNodeAnimatinModel(line);
+                                    nodeAnimationModel.show = true;
+                                    nodeAnimationFlag = true;
+                                });
+                                lineHandler.activate();
+                            }
+                            else {
+                                lineHandler.activate();
+                            }
+                        }
+                        else {
+                            if (typeof nodeAnimationModel !== "undefined") {
+                                nodeAnimationModel.show = false;
+                            }
+                            lineHandler.deactivate();
+                            lineHandler.polylines.removeAll();
+                            nodeAnimationFlag = false;
+                            delete nodeAnimationModel.currentPosition;
+                        }
+                    }
+
+                    function computeCirclularFlight(line, start, stop) {
+                        var length = line._actualPositions.length;
+                        var property = new SuperMap3D.SampledPositionProperty();
+                        var point = [];
+                        var sum = 0;
+                        for (var i = 0; i < length; i++) {
+                            var position = line._actualPositions[i];
+                            if (i > 0) {
+                                var prepostion = line._actualPositions[i - 1];
+                                var distance = SuperMap3D.Cartesian3.distance(position, prepostion);
+                            }
+                            sum += distance || 0;
+                            var time = SuperMap3D.JulianDate.addSeconds(start, sum / 20, new SuperMap3D.JulianDate());
+                            if (i === length - 1) {
+                                viewer.clock.stopTime = time;
+                            }
+                            property.addSample(time, position);
+                        }
+                        return property;
+                    }
+
+                    function rotate(value) {
+                        if (viewer.dataSources.length === 0) {
+                            sweetAlert("error", "Please add KML file firstly", "error");
+                            return;
+                        }
+                        var entity = viewer.dataSources._dataSources[0]._entityCollection._entities._array[0];
+                        if (!SuperMap3D.defined(entity.currentPosition)) {
+                            var position = entity.position;
+                            var time = position._composite.intervals._intervals[0].stop;
+                            entity.currentPosition = position.getValue(time);
+                        }
+                        entity.orientation = SuperMap3D.Transforms.headingPitchRollQuaternion(entity.currentPosition, new SuperMap3D.HeadingPitchRoll(value / 10, 0, 0));
+                    }
+
+                    function changePosition(value) {
+                        var sceme = viewer.scene;
+                        if (viewer.dataSources.length === 0) {
+                            sweetAlert("error", "Please add KML file firstly", "error");
+                            return;
+                        }
+                        var entity = viewer.dataSources._dataSources[0]._entityCollection._entities._array[0];
+                        if (!SuperMap3D.defined(entity.currentPosition)) {
+                            var position = entity.position;
+                            var time = position._composite.intervals._intervals[0].stop;
+                            entity.currentPosition = position.getValue(time);
+                        }
+                        var coordinate = SuperMap3D.Cartographic.fromCartesian(entity.currentPosition);
+                        var longitude = SuperMap3D.Math.toDegrees(coordinate.longitude);
+                        var latitude = SuperMap3D.Math.toDegrees(coordinate.latitude);
+                        var height = coordinate.height;
+                        longitude -= value / 50000;
+                        latitude -= value / 50000;
+                        var newPosition = SuperMap3D.Cartesian3.fromDegrees(longitude, latitude, height);
+                        entity.position = newPosition;
+                    }
+
+                    function bigger() {
+                        if (viewer.dataSources.length === 0) {
+                            sweetAlert("error", "Please add KML file firstly", "error");
+                            return;
+                        }
+                        var entity = viewer.dataSources._dataSources[0]._entityCollection._entities._array[0];
+                        if (!SuperMap3D.defined(entity.model.scale)) {
+                            entity.model.scale = 1;
+                        }
+                        entity.model.scale = entity.model.scale._value + 1;
+                    }
+
+                    function smaller() {
+                        if (viewer.dataSources.length === 0) {
+                            sweetAlert("error", "Please add KML file firstly", "error");
+                            return;
+                        }
+                        var entity = viewer.dataSources._dataSources[0]._entityCollection._entities._array[0];
+                        if (!SuperMap3D.defined(entity.model.scale)) {
+                            entity.model.scale = 1;
+                        }
+                        if (entity.model.scale._value > 1) {
+                            entity.model.scale = entity.model.scale._value - 1;
+                        }
+                    }
+
+                    function setSize(size) {
+                        var entity = viewer.dataSources._dataSources[0]._entityCollection._entities._array[0];
+                        entity.model.scale = size;
+                    }
+
+                    function saveAsKml() {
+                        saveKml(SuperMap3D, viewer);
+                    }
+
+                    $('#rotate').bind('input propertychange', function () {
+                        var value = Number($(this).val());
+                        rotate(value);
+                    });
+                    $('#changePosition').bind('input propertychange', function () {
+                        var value = Number($(this).val());
+                        changePosition(value);
+                    });
+                    $('#setSize').bind('input propertychange', function () {
+                        var value = Number($(this).val());
+                        setSize(value);
+                    });
+                    $('#loadingbar').remove();
+                    $('#toolbar').show();
+                }, function (e) {
+                    if (widget._showRenderLoopErrors) {
+                        var title = '渲染时发生错误，已停止渲染。';
+                        widget.showErrorPanel(title, undefined, e);
+                    }
+                });
+            }
+            catch (e) {
+                if (widget._showRenderLoopErrors) {
+                    var title = '渲染时发生错误，已停止渲染。';
+                    widget.showErrorPanel(title, undefined, e);
+                }
+            }
+        }
+        if (typeof SuperMap3D !== 'undefined') {
+            window.startupCalled = true;
+            onload(SuperMap3D);
+        }
+    </script>
+</body>
+
+</html>

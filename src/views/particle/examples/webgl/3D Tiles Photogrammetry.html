@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>3D Tiles</title>
+    <link href="../../Build/SuperMap3D/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script src="./js/jquery.min.js"></script>
+	<script type="text/javascript" src="../../Build/SuperMap3D/SuperMap3D.js"></script>
+</head>
+<body>
+<div id="Container"></div>
+<div id='loadingbar' class="spinner">
+    <div class="spinner-container container1">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container2">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container3">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+</div>
+<script>
+    function onload(SuperMap3D) {
+        var EngineType = getEngineType();
+        var viewer = new SuperMap3D.Viewer('Container',{
+            contextOptions:{
+                contextType :Number(EngineType)  // Webgl2:2 ; WebGPU:3
+            }
+        });
+        viewer.scenePromise.then(function (scene) {
+                init(SuperMap3D, scene, viewer);
+            });
+    }
+    function init(SuperMap3D, scene, viewer) {
+        var obj = [6378137.0, 6378137.0, 6356752.3142451793];
+        SuperMap3D.Ellipsoid.WGS84 = Object.freeze(new SuperMap3D.Ellipsoid(obj[0], obj[1], obj[2]));
+        viewer.resolutionScale = window.devicePixelRatio;
+        scene.lightSource.ambientLightColor = new SuperMap3D.Color(0.65, 0.65, 0.65, 1);
+
+        var tileset = viewer.scene.primitives.add(new SuperMap3D.Cesium3DTileset({
+            url: 'https://beta.SuperMap3D.com/api/assets/1458?access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxYmJiNTAxOC1lOTg5LTQzN2EtODg1OC0zMWJjM2IxNGNlYmMiLCJpZCI6NDQsImFzc2V0cyI6WzE0NThdLCJpYXQiOjE0OTkyNjM4MjB9.1WKijRa-ILkmG6utrhDWX6rDgasjD7dZv-G5ZyCmkKg'
+        }));
+
+        tileset.readyPromise.then(function () {
+            var boundingSphere = tileset.boundingSphere;
+            viewer.camera.viewBoundingSphere(boundingSphere, new SuperMap3D.HeadingPitchRange(0.0, -0.5, boundingSphere.radius));
+            viewer.camera.lookAtTransform(SuperMap3D.Matrix4.IDENTITY);
+        }).otherwise(function (error) {
+            throw(error);
+        });
+        $('#loadingbar').remove();
+    }
+    if (typeof SuperMap3D !== 'undefined') {
+        window.startupCalled = true;
+        onload(SuperMap3D);
+    }
+</script>
+</body>
+</html>

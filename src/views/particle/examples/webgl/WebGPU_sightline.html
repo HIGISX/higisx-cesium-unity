@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>通视分析</title>
+    <link href="../../Build/SuperMap3D/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script src="./js/config.js"></script>
+    <script type="text/javascript" src="../../Build/SuperMap3D/SuperMap3D.js"></script>
+</head>
+<body>
+<div id="Container"></div>
+<div id='loadingbar' class="spinner">
+    <div class="spinner-container container1">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container2">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container3">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+</div>
+<div id='toolbar' class="param-container tool-bar">
+    <button type="button" id="chooseView" class="button black">选取观察位置</button>
+    <button type="button" id="addPoint" class="button black">添加目标点</button>
+    <button type="button" id="clear" class="button black">清除</button>
+</div>
+
+<script type="text/javascript">
+
+    function onload(SuperMap3D) {
+        // 通过config.js中的getEngineType,获取引擎类型（EngineType）用于设置启动方式
+        var EngineType = getEngineType(); 
+        var viewer = new SuperMap3D.Viewer('Container', {
+            contextOptions: {
+                contextType: Number(EngineType), // Webgl2:2 ; WebGPU:3
+            }
+        });
+
+        viewer.scenePromise.then(function(scene){
+            init(SuperMap3D, scene, viewer);
+        });
+    }
+
+    function init(SuperMap3D, scene, viewer) {
+        scene.globe.depthTestAgainstTerrain = true;
+        scene.shadowMap.darkness = 1.275; //设置第二重烘焙纹理的效果（明暗程度）
+        
+        scene.debugShowFramesPerSecond = false;
+        scene.hdrEnabled = false;
+        scene.sun.show = false;
+        // 01设置环境光的强度-新处理CBD场景
+        scene.lightSource.ambientLightColor = new SuperMap3D.Color(0.65, 0.65, 0.65, 1);
+        // 添加光源
+        var position1 = new SuperMap3D.Cartesian3.fromDegrees(116.261209157595,  39.3042238956531, 480);
+        //光源方向点
+
+        var targetPosition1 = new SuperMap3D.Cartesian3.fromDegrees(116.261209157595, 39.3042238956531,430);
+        var dirLightOptions = {
+            targetPosition: targetPosition1,
+            color: new SuperMap3D.Color(1.0, 1.0, 1.0, 1),
+            intensity: 0.55
+        };
+        directionalLight_1 = new SuperMap3D.DirectionalLight(position1, dirLightOptions);
+        scene.addLightSource(directionalLight_1);
+        var sightline = new SuperMap3D.Sightline(scene);
+        sightline.couldRemove = false;
+
+        var handlerPoint = new SuperMap3D.DrawHandler(viewer, SuperMap3D.DrawMode.Point);
+        var widget = viewer.Widget;
+        try{
+            var url = 'http://www.supermapol.com/realspace/services/3D-CBDCache20200416-2/rest/realspace';
+            var promise = scene.open(url);
+            SuperMap3D.when(promise, function (layers) {
+                for (var i = 0; i < layers.length; i++) {
+                    layers[i].selectEnabled = false;
+                }
+            }, function (e) {
+                if (widget._showRenderLoopErrors) {
+                    var title = '加载SCP失败，请检查网络连接状态或者url地址是否正确？';
+                    widget.showErrorPanel(title, undefined, e);
+                }
+            });
+
+            sightline.build();
+        }
+        catch(e){
+            if (widget._showRenderLoopErrors) {
+                var title = '渲染时发生错误，已停止渲染。';
+                widget.showErrorPanel(title, undefined, e);
+            }
+        }
+
+        handlerPoint.drawEvt.addEventListener(function(result){
+            var point = result.object;
+            point.show = false;
+            var position = result.object.position;
+
+            //将获取的点的位置转化成经纬度
+            var cartographic = SuperMap3D.Cartographic.fromCartesian(position);
+            var longitude = SuperMap3D.Math.toDegrees(cartographic.longitude);
+            var latitude = SuperMap3D.Math.toDegrees(cartographic.latitude);
+            var height = cartographic.height;
+
+            if(scene.viewFlag) {
+                //设置观察点
+                sightline.viewPosition = [longitude, latitude, height];
+                scene.viewFlag = false;
+            }else {
+                //添加目标点
+                sightline.addTargetPoint({
+                    position : [longitude, latitude, height],
+                    name : "point" + new Date()
+                });
+                sightline.couldRemove = true;
+            }
+        });
+
+        $('#chooseView').click(function () {
+            if(handlerPoint.active) {
+                return;
+            }
+            scene.viewFlag = true;
+            viewer.entities.removeAll();
+            if(sightline.couldRemove) {
+                sightline.removeAllTargetPoint();
+            }
+            handlerPoint.activate();
+        });
+
+        $('#addPoint').click(function () {
+            scene.viewFlag = false;
+            handlerPoint.activate();
+        });
+
+        $('#clear').click(function () {
+            handlerPoint.clear();
+            viewer.entities.removeAll();
+            if(sightline.couldRemove){
+                sightline.removeAllTargetPoint();
+                sightline.couldRemove = false;
+            }
+        });
+
+        $("#toolbar").show();
+        $('#loadingbar').remove();
+    }
+    if (typeof SuperMap3D !== 'undefined') {
+        window.startupCalled = true;
+        onload(SuperMap3D);
+    }
+    </script>
+</body>
+</html>

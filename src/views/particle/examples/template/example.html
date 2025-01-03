@@ -1,0 +1,216 @@
+<!--********************************************************************
+* Copyright© 2000 - 2020 SuperMap Software Co.Ltd. All rights reserved.
+*********************************************************************-->
+<!--头部导航-->
+<header class="header-wrapper main-header icl-header">
+
+    <nav class="navbar navbar-static-top">
+        <div class="nav-header"></div>
+    </nav>
+</header>
+<!--头部导航 end-->
+
+<!-- 侧边栏 -->
+<aside class="sidebar-wrapper main-sidebar" id="scrollSpy">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar" id="sidebar">
+        <a href="#" class="sidebar-toggle " data-toggle="offcanvas" role="button" title="fold" id="sidebarSwitch">
+            <div class="fa  fa-bars fold"></div>
+        </a>
+        <!-- sidebar menu: : style can be found in sidebar.less -->
+        <ul class=" sidebar-menu nav  nav-stacked" id="sidebar-menu">
+            <div id="containerExpand">
+                <span class="lable">示例运行引擎:</span>
+                <div id="engineChangeHeaderDOM">
+                    <select class="engineSelect" id="engineSelectDom">
+                        <option class="engineTypeOption" selected value="WebGL" >WebGL</option>
+                        <option class="engineTypeOption" value="WebGPU">WebGPU</option>
+                    </select>
+                </div>
+            </div>
+            <li id="contianerFold" class="treeview" title="点击可切换示例运行引擎">
+                <a >
+                    <i class="icon-WebGL iconName" id="iconDom"></i>
+                </a>
+                <span id="hotPoint"></span>
+
+            </li>
+        </ul>
+    </section>
+    <!-- /.sidebar -->
+</aside>
+<!--侧边栏 end-->
+
+<!-- 内容区 -->
+<div class="content-wrapper examples-container" id="main">
+    <ul id="charts-list"></ul>
+</div>
+<!--内容区 end-->
+
+<!-- footer -->
+<footer class="main-footer icl-footer"></footer>
+<!--footer end-->
+
+<!-- 引擎切换样式 -->
+<style>
+    #containerExpand{
+        font-size: 14px;
+        color: #FFFFFF;
+        font-family: "Microsoft Yahei";
+        background-color: #282828;
+        height: 40px;
+        line-height: 40px;
+    }
+    #containerExpand>.lable{
+        margin-left: 18px;
+    }
+    #contianerFold{
+        display: none;
+        background-color: #282828;
+        height: 40px;
+    }
+    /* .engineTypeOption {
+        background-color: yellow;
+        color: red;
+    } */
+    #engineChangeHeaderDOM{
+        display: inline;
+        /* line-height: 55px; */
+    }
+
+    #engineChangeHeaderDOM>.engineSelect{
+        font-size: 14px;
+        /* color: #FFFFFF; */
+        color: rgba(240, 189, 62, 1);
+        font-family: "Microsoft Yahei";
+        background-color: #282828;
+        border: none;
+        outline: none;
+        /* margin-bottom: 5px; */
+    }
+
+    #iconDom{
+        margin-left: -14px;
+        color: rgba(240, 189, 62, 1);
+    }
+
+    #hotPoint{
+        position: relative;
+        top: -45px;
+        left: 39px;
+        /* display: inline-block; */
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(225, 77, 87, 1);
+        margin-right: 5px;
+    }
+</style>
+
+<script>
+    // 引擎切换事件
+    window.onload = function(){
+        var selectDom = document.getElementById('engineSelectDom');
+        var sidebarDom = document.getElementById('sidebarSwitch');
+        var iconDom = document.getElementById('iconDom');
+        // 初始化时，获取设置select的索引
+        setSelectIndex();
+
+        // 添加 change 事件监听器
+        selectDom.addEventListener('change', event => {
+            var iframeUrl = getIframeUrl();
+            // 获取当前选中的选项的值
+            const selectedValue = event.target.value;
+
+            console.log(`开启${selectedValue}模式`);
+
+            var iframeDom = document.querySelector('#innerPage');
+
+            // 根据选项的值执行不同的操作
+            if (selectedValue === 'WebGL') {
+                localStorage.setItem("EngineType", 2);
+                if (iframeDom) iframeDom.src = iframeUrl;
+                iconDom.className = "icon-WebGL iconName";
+            } else if (selectedValue === 'WebGPU') {
+                localStorage.setItem("EngineType", 3);
+                if (iframeDom) iframeDom.src = iframeUrl;
+                iconDom.className = "icon-WebGPU iconName";
+            }
+        });
+
+        // 侧边栏展开关闭事件监听
+        sidebarDom.addEventListener('click',()=>{
+            var containerExpandDom = document.getElementById('containerExpand');
+            var contianerFoldDom = document.getElementById('contianerFold');
+            if(containerExpandDom && containerExpandDom.style.display != 'none'){
+                containerExpandDom.style.display = 'none';
+                contianerFoldDom.style.display = 'block';
+            } else {
+                // 侧边栏展开时，重新获取设置一下select的索引
+                setSelectIndex();
+                containerExpandDom.style.display = 'block';
+                contianerFoldDom.style.display = 'none';
+            }
+        })
+
+        // 图标点击事件监听
+        iconDom.addEventListener('click',()=>{
+            var clickType = localStorage.getItem("EngineType");
+            
+            var iframeUrl = getIframeUrl();
+            var iframeDom = document.querySelector('#innerPage');
+            // 根据clickType的值执行不同的操作
+            if (Number(clickType) === 3) {
+                console.log(`开启WebGL模式`);
+                localStorage.setItem("EngineType", 2);
+                if (iframeDom) iframeDom.src = iframeUrl;
+                iconDom.className = "icon-WebGL iconName";
+            } else if (Number(clickType) === 2) {
+                console.log(`开启WebGPU模式`);
+                localStorage.setItem("EngineType", 3);
+                if (iframeDom) iframeDom.src = iframeUrl;
+                iconDom.className = "icon-WebGPU iconName";
+            }
+        });
+
+        // 设置选择栏索引
+        function setSelectIndex(){
+            var type = localStorage.getItem("EngineType");
+            if (Number(type) === 2) {
+                selectDom.selectedIndex = 0;
+                iconDom.className = "icon-WebGL iconName";
+            } else if (Number(type) === 3) {
+                selectDom.selectedIndex = 1;
+                iconDom.className = "icon-WebGPU iconName";
+            } else {
+                selectDom.selectedIndex = 0;
+            }
+        }
+
+        function getIframeUrl() {
+            var locationParam = getLocationParam();
+            if (!locationParam) {
+                return;
+            }
+            var href = window.location.toString();
+            var mapUrl = href.substr(0, href.lastIndexOf('/') + 1);
+            mapUrl = mapUrl + locationParam + ".html";
+            if (!mapUrl) {
+                return;
+            }
+            return mapUrl;
+        }
+
+        function getLocationParam() {
+            var param = window.location.toString();
+            if (param.indexOf("#") === -1) {
+                return null;
+            }
+            param = param.split("#");
+            if (param && param.length > 0) {
+                return param[1];
+            }
+        }
+
+    }
+</script>

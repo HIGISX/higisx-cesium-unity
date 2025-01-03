@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>火焰</title>
+    <link href="../../Build/SuperMap3D/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/Sandcastle-header.js"></script>
+    <script type="text/javascript" src="../../Build/SuperMap3D/SuperMap3D.js"></script>
+</head>
+<body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html">
+<div id="Container" class="fullSize"></div>
+<div id="loadingOverlay"><h1>Loading...</h1></div>
+<div id="toolbar" class="param-container tool-bar">
+    <table>
+        <tbody>
+        <tr>
+            <td>速度</td>
+            <td>
+                <input type="range" min="0.0" max="100.0" step="1" data-bind="value: emissionRate, valueUpdate: 'input'">
+                <input type="text" size="5" data-bind="value: emissionRate">
+            </td>
+        </tr>
+
+        <tr>
+            <td>粒子大小</td>
+            <td>
+                <input type="range" min="2" max="60.0" step="1" data-bind="value: particleSize, valueUpdate: 'input'">
+                <input type="text" size="5" data-bind="value: particleSize">
+            </td>
+        </tr>
+
+        <tr>
+            <td>最小生命周期</td>
+            <td>
+                <input type="range" min="0.1" max="30.0" step="1" data-bind="value: minimumParticleLife, valueUpdate: 'input'">
+                <input type="text" size="5" data-bind="value: minimumParticleLife">
+            </td>
+        </tr>
+
+        <tr>
+            <td>最大生命周期</td>
+            <td>
+                <input type="range" min="0.1" max="30.0" step="1" data-bind="value: maximumParticleLife, valueUpdate: 'input'">
+                <input type="text" size="5" data-bind="value: maximumParticleLife">
+            </td>
+        </tr>
+
+        <tr>
+            <td>最小速度</td>
+            <td>
+                <input type="range" min="0.0" max="30.0" step="1" data-bind="value: minimumSpeed, valueUpdate: 'input'">
+                <input type="text" size="5" data-bind="value: minimumSpeed">
+            </td>
+        </tr>
+
+        <tr>
+            <td>最大速度</td>
+            <td>
+                <input type="range" min="0.0" max="30.0" step="1" data-bind="value: maximumSpeed, valueUpdate: 'input'">
+                <input type="text" size="5" data-bind="value: maximumSpeed">
+            </td>
+        </tr>
+
+        <tr>
+            <td>初始比例</td>
+            <td>
+                <input type="range" min="0.0" max="10.0" step="1" data-bind="value: startScale, valueUpdate: 'input'">
+                <input type="text" size="5" data-bind="value: startScale">
+            </td>
+        </tr>
+
+        <tr>
+            <td>终止比例</td>
+            <td>
+                <input type="range" min="0.0" max="10.0" step="1" data-bind="value: endScale, valueUpdate: 'input'">
+                <input type="text" size="5" data-bind="value: endScale">
+            </td>
+        </tr>
+
+        <tr>
+            <td>重力</td>
+            <td>
+                <input type="range" min="-20.0" max="20.0" step="1" data-bind="value: gravity, valueUpdate: 'input'">
+                <input type="text" size="5" data-bind="value: gravity">
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div id='loadingbar' class="spinner">
+    <div class="spinner-container container1">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container2">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container3">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+</div>
+
+<script>
+    function onload(SuperMap3D) {
+            var EngineType = getEngineType();
+            var viewer = new SuperMap3D.Viewer('Container', {
+                contextOptions: {
+                    contextType: Number(EngineType)  // Webgl2:2 ; WebGPU:3
+                }
+            });
+
+            viewer.scenePromise.then(function (scene) {
+                init(SuperMap3D, scene, viewer);
+            });
+        }
+    function init(SuperMap3D, scene, viewer) {
+        'use strict';
+        viewer.resolutionScale = window.devicePixelRatio;
+
+
+        //设置随机数
+        SuperMap3D.Math.setRandomNumberSeed(3);
+
+
+        var start = SuperMap3D.JulianDate.fromDate(new Date(2015, 2, 25, 16));
+        var stop = SuperMap3D.JulianDate.addSeconds(start, 120, new SuperMap3D.JulianDate());
+
+
+        viewer.clock.startTime = start.clone();
+        viewer.clock.stopTime = stop.clone();
+        viewer.clock.currentTime = start.clone();
+        viewer.clock.clockRange = SuperMap3D.ClockRange.LOOP_STOP; 
+        viewer.clock.multiplier = 1;
+        viewer.clock.shouldAnimate = true;
+
+
+        var viewModel = {
+            emissionRate : 5.0,
+            gravity : 0.0,
+            minimumParticleLife : 1.2,
+            maximumParticleLife : 1.2,
+            minimumSpeed : 1.0,
+            maximumSpeed : 4.0,
+            startScale : 1.0,
+            endScale : 5.0,
+            particleSize : 25.0
+        };
+
+        SuperMap3D.knockout.track(viewModel);
+        var toolbar = document.getElementById('toolbar');
+        SuperMap3D.knockout.applyBindings(viewModel, toolbar);
+
+        var entityPosition = new SuperMap3D.Cartesian3();
+        var entityOrientation = new SuperMap3D.Quaternion();
+        var rotationMatrix = new SuperMap3D.Matrix3();
+        var modelMatrix = new SuperMap3D.Matrix4();
+
+        function computeModelMatrix(entity, time) {
+            return entity.computeModelMatrix(time, new SuperMap3D.Matrix4());
+        }
+
+        var emitterModelMatrix = new SuperMap3D.Matrix4();
+        var translation = new SuperMap3D.Cartesian3();
+        var rotation = new SuperMap3D.Quaternion();
+        var hpr = new SuperMap3D.HeadingPitchRoll();
+        var trs = new SuperMap3D.TranslationRotationScale();
+
+        function computeEmitterModelMatrix() {
+            hpr = SuperMap3D.HeadingPitchRoll.fromDegrees(0.0, 0.0, 0.0, hpr);
+            trs.translation = SuperMap3D.Cartesian3.fromElements(-4.0, 0.0, 1.4, translation);
+            trs.rotation = SuperMap3D.Quaternion.fromHeadingPitchRoll(hpr, rotation);
+
+            return SuperMap3D.Matrix4.fromTranslationRotationScale(trs, emitterModelMatrix);
+        }
+
+        var pos1 = SuperMap3D.Cartesian3.fromDegrees(-75.15787310614596, 39.97862668312678);
+        var pos2 = SuperMap3D.Cartesian3.fromDegrees(-75.1633691390455, 39.95355089912078);
+        var position = new SuperMap3D.SampledPositionProperty();
+
+        position.addSample(start, pos1);
+        position.addSample(stop, pos2);
+
+        var entity = viewer.entities.add({
+            availability : new SuperMap3D.TimeIntervalCollection([new SuperMap3D.TimeInterval({
+                start : start,
+                stop : stop
+            })]),
+            model : {
+                uri : './SampleData/models/SuperMap_Ground.gltf',
+                minimumPixelSize : 64
+            },
+            viewFrom: new SuperMap3D.Cartesian3(-100.0, 0.0, 100.0),
+            position : position,
+            orientation : new SuperMap3D.VelocityOrientationProperty(position)
+        });
+        viewer.trackedEntity = entity;
+
+        var scene = viewer.scene;
+        scene.lightSource.ambientLightColor = new SuperMap3D.Color(0.65, 0.65, 0.65, 1);
+        var particleSystem = scene.primitives.add(new SuperMap3D.ParticleSystem({
+            image : './images/fire.png',
+
+            startColor : SuperMap3D.Color.LIGHTSEAGREEN.withAlpha(0.7),
+            endColor : SuperMap3D.Color.WHITE.withAlpha(0.0),
+
+            startScale : viewModel.startScale,
+            endScale : viewModel.endScale,
+
+            minimumParticleLife : viewModel.minimumParticleLife,
+            maximumParticleLife : viewModel.maximumParticleLife,
+
+            minimumSpeed : viewModel.minimumSpeed,
+            maximumSpeed : viewModel.maximumSpeed,
+
+            imageSize : new SuperMap3D.Cartesian2(viewModel.particleSize, viewModel.particleSize),
+
+            emissionRate : viewModel.emissionRate,
+
+            bursts : [
+                
+                new SuperMap3D.ParticleBurst({time : 5.0, minimum : 10, maximum : 100}),
+                new SuperMap3D.ParticleBurst({time : 10.0, minimum : 50, maximum : 100}),
+                new SuperMap3D.ParticleBurst({time : 15.0, minimum : 200, maximum : 300})
+            ],
+
+            lifetime : 16.0,
+
+            emitter : new SuperMap3D.CircleEmitter(2.0),
+
+            emitterModelMatrix : computeEmitterModelMatrix(),
+
+            updateCallback : applyGravity
+        }));
+
+        var gravityScratch = new SuperMap3D.Cartesian3();
+
+        function applyGravity(p, dt) {
+
+            var position = p.position;
+
+            SuperMap3D.Cartesian3.normalize(position, gravityScratch);
+            SuperMap3D.Cartesian3.multiplyByScalar(gravityScratch, viewModel.gravity * dt, gravityScratch);
+
+            p.velocity = SuperMap3D.Cartesian3.add(p.velocity, gravityScratch, p.velocity);
+        }
+
+        viewer.scene.preUpdate.addEventListener(function(scene, time) {
+            particleSystem.modelMatrix = computeModelMatrix(entity, time);
+
+            //计算模型矩阵
+            particleSystem.emitterModelMatrix = computeEmitterModelMatrix();
+
+
+            if (viewModel.spin) {
+                viewModel.heading += 1.0;
+                viewModel.pitch += 1.0;
+                viewModel.roll += 1.0;
+            }
+        });
+
+        SuperMap3D.knockout.getObservable(viewModel, 'emissionRate').subscribe(
+            function(newValue) {
+                particleSystem.emissionRate = parseFloat(newValue);
+            }
+        );
+
+        SuperMap3D.knockout.getObservable(viewModel, 'particleSize').subscribe(
+            function(newValue) {
+                var particleSize = parseFloat(newValue);
+                particleSystem.minimumImageSize.x = particleSize;
+                particleSystem.minimumImageSize.y = particleSize;
+                particleSystem.maximumImageSize.x = particleSize;
+                particleSystem.maximumImageSize.y = particleSize;
+            }
+        );
+
+        SuperMap3D.knockout.getObservable(viewModel, 'minimumParticleLife').subscribe(
+            function(newValue) {
+                particleSystem.minimumParticleLife = parseFloat(newValue);
+            }
+        );
+
+        SuperMap3D.knockout.getObservable(viewModel, 'maximumParticleLife').subscribe(
+            function(newValue) {
+                particleSystem.maximumParticleLife = parseFloat(newValue);
+            }
+        );
+
+        SuperMap3D.knockout.getObservable(viewModel, 'minimumSpeed').subscribe(
+            function(newValue) {
+                particleSystem.minimumSpeed = parseFloat(newValue);
+            }
+        );
+
+        SuperMap3D.knockout.getObservable(viewModel, 'maximumSpeed').subscribe(
+            function(newValue) {
+                particleSystem.maximumSpeed = parseFloat(newValue);
+            }
+        );
+
+        SuperMap3D.knockout.getObservable(viewModel, 'startScale').subscribe(
+            function(newValue) {
+                particleSystem.startScale = parseFloat(newValue);
+            }
+        );
+
+        SuperMap3D.knockout.getObservable(viewModel, 'endScale').subscribe(
+            function(newValue) {
+                particleSystem.endScale = parseFloat(newValue);
+            }
+        );
+
+        var options = [{
+            text : '圆形放射',
+            onselect : function() {
+                particleSystem.emitter = new SuperMap3D.CircleEmitter(2.0);
+            }
+        }, {
+            text : '球体放射',
+            onselect : function() {
+                particleSystem.emitter = new SuperMap3D.SphereEmitter(2.5);
+            }
+        }, {
+            text : '圆锥体放射',
+            onselect : function() {
+                particleSystem.emitter = new SuperMap3D.ConeEmitter(SuperMap3D.Math.toRadians(45.0));
+            }
+        }, {
+            text : '盒状放射',
+            onselect : function() {
+                particleSystem.emitter = new SuperMap3D.BoxEmitter(new SuperMap3D.Cartesian3(10.0, 10.0, 10.0));
+            }
+        }];
+        Sandcastle.addToolbarMenu(options);
+        $("#toolbar").show();
+        $('#loadingbar').remove();
+    }
+    if (typeof SuperMap3D !== 'undefined') {
+        window.startupCalled = true;
+        onload(SuperMap3D);
+    }
+</script>
+</body>
+</html>
