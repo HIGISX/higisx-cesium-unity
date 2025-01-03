@@ -26,31 +26,36 @@ const routes = [
           // activePath: "/particle/snow",
         },
       },
+
+
       {
         path: "rain",
         name: "particle_rain",
-        component: () => import("@/views/particle/rain.vue"),
+        component: () => import("@/views/particle/cloudAndSky.vue"),
         meta: {
-          title: "云水路径",
+          title: "cloudAndSky",
           activePath: "/particle/rain",
         },
       },
+
       {
         path: "fog",
         name: "particle_fog",
-        component: () => import("@/views/particle/fog.vue"),
+        component: () => import("@/views/particle/aqi.vue"),
         meta: {
-          title: "降雨",
+          title: "aqi",
           activePath: "/particle/fog",
         },
       },
+
+
       {
-        path: "fire",
-        name: "particle_fire",
-        component: () => import("@/views/particle/fire.vue"),
+        path: "district",
+        name: "particle_district",
+        component: () => import("@/views/particle/district.vue"),
         meta: {
-          title: "廓线",
-          activePath: "/particle/fire",
+          title: "district",
+          activePath: "/particle/district",
         },
       },
     ],
@@ -73,12 +78,12 @@ const routes = [
       },
 
       {
-        path: "fly",
-        name: "camera_fly",
-        component: () => import("@/views/camera/fly.vue"),
+        path: "volumeCloud",
+        name: "camera_volumeCloud",
+        component: () => import("@/views/particle/volumeCloud.vue"),
         meta: {
-          title: "优势树种分类",
-          activePath: "/camera/fly",
+          title: "volumeCloud.vue",
+          activePath: "/camera/volumeCloud",
         },
       },
       {
