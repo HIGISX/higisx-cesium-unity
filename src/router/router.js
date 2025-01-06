@@ -59,14 +59,34 @@ const routes = [
         },
       },
       {
-        path: "district",
-        name: "particle_district",
-        component: () => import("@/views/particle/district.vue"),
+        path: "tempAnimation",
+        name: "particle_tempAnimation",
+        component: () => import("@/views/particle/tempAnimation.vue"),
         meta: {
-          title: "district",
-          activePath: "/particle/district",
+          title: "tempAnimation",
+          activePath: "/particle/tempAnimation",
         },
       },
+      {
+        path: "statelliteFoot",
+        name: "particle_statelliteFoot",
+        component: () => import("@/views/particle/statelliteFoot.vue"),
+        meta: {
+          title: "statelliteFoot",
+          activePath: "/particle/statelliteFoot",
+        },
+      },
+      {
+        path: "planefly",
+        name: "particle_planefly",
+        component: () => import("@/views/particle/planefly.vue"),
+        meta: {
+          title: "planefly",
+          activePath: "/particle/planefly",
+        },
+      },
+
+
     ],
   },
   {
@@ -96,12 +116,12 @@ const routes = [
         },
       },
       {
-        path: "fly",
-        name: "camera_fly",
-        component: () => import("@/views/camera/fly.vue"),
+        path: "point-grid",
+        name: "camera_point-grid",
+        component: () => import("@/views/particle/point-grid.vue"),
         meta: {
-          title: "林下地形",
-          activePath: "/camera/fly",
+          title: "point-grid",
+          activePath: "/camera/point-grid",
         },
       },
       {
@@ -152,12 +172,12 @@ const routes = [
       },
       // windParticle
       {
-        path: "combine",
-        name: "mark_combine",
-        component: () => import("@/views/mark/combine.vue"),
+        path: "canvasWind",
+        name: "mark_canvasWind",
+        component: () => import("@/views/particle/canvasWind.vue"),
         meta: {
-          title: "海表二维流场",
-          activePath: "/mark/combine",
+          title: "canvasWind",
+          activePath: "/mark/canvasWind",
         },
       },
       {
