@@ -58,6 +58,15 @@ const routes = [
           activePath: "/particle/district",
         },
       },
+      {
+        path: "district",
+        name: "particle_district",
+        component: () => import("@/views/particle/district.vue"),
+        meta: {
+          title: "district",
+          activePath: "/particle/district",
+        },
+      },
     ],
   },
   {

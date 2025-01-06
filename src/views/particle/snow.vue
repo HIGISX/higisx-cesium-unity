@@ -12,7 +12,10 @@
   <div class="container">
 <!--    <el-button type="primary" @click="start">开始</el-button>-->
 <!--    <el-button type="primary" @click="hide">停止</el-button>-->
-    <iframe src="http://localhost:3001/read-vue.html?key=ex_10_2_2&id=thirdParty/quickearth/extrusion" frameborder="0" width="1730px" height="980px"></iframe>
+    <iframe id="myiframe" src="http://192.168.3.45:3001/read-vue.html?key=ex_10_2_2&id=thirdParty/quickearth/extrusion" frameborder="0"></iframe>
+  </div>
+  <div>
+
   </div>
 </template>
 
@@ -21,4 +24,9 @@
   position: absolute;
   z-index: 100;
 }
+#myiframe {
+  width: 1920px;
+  height: 1080px;
+}
+
 </style>
