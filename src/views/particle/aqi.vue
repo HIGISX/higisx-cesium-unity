@@ -12,7 +12,7 @@
   <div class="container">
     <!--    <el-button type="primary" @click="start">开始</el-button>-->
     <!--    <el-button type="primary" @click="hide">停止</el-button>-->
-    <iframe src="src/views/particle/examples/webgl/aqi.html" frameborder="0" width="1760px" height="980px"></iframe>
+    <iframe id="myiframe" src="src/views/particle/examples/webgl/aqi.html" frameborder="0"></iframe>
   </div>
 </template>
 
@@ -20,5 +20,9 @@
 .container {
   position: absolute;
   z-index: 100;
+}
+#myiframe {
+  width: 1480px;
+  height: 985px;
 }
 </style>

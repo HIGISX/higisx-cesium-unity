@@ -12,7 +12,7 @@
   <div class="container">
     <!--    <el-button type="primary" @click="start">开始</el-button>-->
     <!--    <el-button type="primary" @click="hide">停止</el-button>-->
-    <iframe src="http://192.168.3.45:3001/read-vue.html?key=ex_10_1_1&id=layer-other/weather/canvasWind" frameborder="0" width="1730px" height="980px"></iframe>
+    <iframe src="http://192.168.3.179:3001/read-vue.html?key=ex_10_1_1&id=layer-other/weather/canvasWind" frameborder="0" width="1730px" height="980px"></iframe>
   </div>
 </template>
 
