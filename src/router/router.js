@@ -73,15 +73,15 @@ const routes = [
           activePath: "/camera/point-grid",
         },
       },
-      {
-        path: "addSymbolsBatch",
-        name: "camera_addSymbolsBatch",
-        component: () => import("@/views/particle/addSymbolsBatch.vue"),
-        meta: {
-          title: "区域优势树种(备选)",
-          activePath: "/camera/addSymbolsBatch",
-        },
-      },
+      // {
+      //   path: "addSymbolsBatch",
+      //   name: "camera_addSymbolsBatch",
+      //   component: () => import("@/views/particle/addSymbolsBatch.vue"),
+      //   meta: {
+      //     title: "区域优势树种(备选)",
+      //     activePath: "/camera/addSymbolsBatch",
+      //   },
+      // },
     ]
 
   },
@@ -119,6 +119,24 @@ const routes = [
           activePath: "/mark/windParticle",
         },
       },
+      {
+        path: "windParticle2",
+        name: "mark_windParticle2",
+        component: () => import("@/views/particle/windParticle2.vue"),
+        meta: {
+          title: "全球洋流2",
+          activePath: "/mark/windParticle2",
+        },
+      },
+      {
+        path: "windParticle3",
+        name: "mark_windParticle3",
+        component: () => import("@/views/particle/windParticle3.vue"),
+        meta: {
+          title: "全球洋流3",
+          activePath: "/mark/windParticle3",
+        },
+      },
     ]
   },
   {
@@ -137,15 +155,15 @@ const routes = [
           activePath: "/ice/switchGlobeMod",
         },
       },
-      {
-        path: "switchGlobeMod2",
-        name: "switchGlobeMod2",
-        component: () => import("@/views/particle/switchGlobeMod2.vue"),
-        meta: {
-          title: "冰冻圈层演示(备选)",
-          activePath: "/ice/switchGlobeMod2",
-        },
-      },
+      // {
+      //   path: "switchGlobeMod2",
+      //   name: "switchGlobeMod2",
+      //   component: () => import("@/views/particle/switchGlobeMod2.vue"),
+      //   meta: {
+      //     title: "冰冻圈层演示(备选)",
+      //     activePath: "/ice/switchGlobeMod2",
+      //   },
+      // },
     ]
   },
   {
@@ -173,15 +191,15 @@ const routes = [
       title: "其他功能",
     },
     children: [
-      {
-        path: "district",
-        name: "particle_district",
-        component: () => import("@/views/particle/district.vue"),
-        meta: {
-          title: "演示区域展示",
-          activePath: "/particle/district",
-        },
-      },
+      // {
+      //   path: "district",
+      //   name: "particle_district",
+      //   component: () => import("@/views/particle/district.vue"),
+      //   meta: {
+      //     title: "演示区域展示",
+      //     activePath: "/particle/district",
+      //   },
+      // },
       {
         path: "statelliteFoot",
         name: "particle_statelliteFoot",
