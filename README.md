@@ -2,9 +2,14 @@
 基于cesium修改的可视化项目
 
 使用npm安装依赖的时候请使用“npm install --force”
-我们各使用了动mars3d和cesium的几个模板，一cesium为主要模板
+我们各使用了mars3d和cesium的几个模板，其中cesium为主要模板
 先启动mars3d的项目，再启动cesium的项目
 
+Visualization project modified based on Cesium
+
+When installing dependencies with npm, please use 'npm install --force'.
+We used several templates from Mars3D and Cesium, with Cesium being the main template.
+First, start the Mars3D project, then start the Cesium project.
 
 大气圈层:
 
