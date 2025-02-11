@@ -47,13 +47,13 @@ First, start the Mars3D project, then start the Cesium project.
 海洋圈透视探测:
 
 
-![image](https://github.com/user-attachments/assets/2b5e3539-9350-48b2-8d28-f6614de0ffa6)
+https://github.com/user-attachments/assets/d996465e-96c5-46e9-8fb8-9d99ed483853
+
 
 
 冰冻圈透视探测:
 
 
-![image](https://github.com/user-attachments/assets/d32389ac-98e2-4baf-b04d-3929f308d365)
 
 
 三维飞行路径展示:
