@@ -1,6 +1,28 @@
 # higisx-cesium-Unity
+
+
 本项目集成Cesium 3.1与团结引擎（2022），构建地理数据多维展示系统；系统采用TUIO交互协议，支持多点触控与实体对象自然交互，增强用户沉浸感与体验感。项目采用前后端分离架构，前端基于Unity客户端负责动态渲染与交互反馈，后端基于Cesium平台实现多维空间数据的建模和高效管理。
+
+
 ![iShot_2025-06-13_16 53 45](https://github.com/user-attachments/assets/b9de1e30-1eab-423c-b81f-39a177d62afe)
+
+
+## 真实水体模拟技术
+
+
+基于Crest库，利用傅里叶变换模拟动态波浪效果，捕捉波浪细节及运动特性，加入光线追踪渲染技术，实现光影折射与反射细节，提升海面视觉真实感。
+
+![image](https://github.com/user-attachments/assets/e3a89e7b-b726-4823-9da4-88bcc97b60f7)
+
+
+## 混合现实交互技术
+
+
+基于TUIO库构建交互系统，重构Controller库，实现隔空手势识别与跟踪，支持自然、高效的人机交互模式；系统具备动态交互功能，用户可通过手势对虚拟场景进行操控，实现空间数据的互操作。
+
+
+
+![image](https://github.com/user-attachments/assets/713ca3c6-29ef-4274-9d8c-f2dc61057edc)
 
 # higisx-cesium-js
 基于cesium修改的可视化项目
