@@ -1,6 +1,5 @@
 # higisx-cesium-Unity
 
-![image](https://github.com/user-attachments/assets/caa065ca-f7d0-45f7-9817-88c7ebcb2575)
 
 
 本项目集成Cesium 3.1与团结引擎（2022），构建地理数据多维展示系统；系统采用TUIO交互协议，支持多点触控与实体对象自然交互，增强用户沉浸感与体验感。项目采用前后端分离架构，前端基于Unity客户端负责动态渲染与交互反馈，后端基于Cesium平台实现多维空间数据的建模和高效管理。
