@@ -1,4 +1,4 @@
-# higisx-cesium-Unity
+![image](https://github.com/user-attachments/assets/caa065ca-f7d0-45f7-9817-88c7ebcb2575)# higisx-cesium-Unity
 
 
 本项目集成Cesium 3.1与团结引擎（2022），构建地理数据多维展示系统；系统采用TUIO交互协议，支持多点触控与实体对象自然交互，增强用户沉浸感与体验感。项目采用前后端分离架构，前端基于Unity客户端负责动态渲染与交互反馈，后端基于Cesium平台实现多维空间数据的建模和高效管理。
@@ -23,6 +23,28 @@
 
 
 ![image](https://github.com/user-attachments/assets/713ca3c6-29ef-4274-9d8c-f2dc61057edc)
+
+
+## 大气圈层
+
+![image](https://github.com/user-attachments/assets/179b6b96-f686-4ebc-901e-3e3b69e54863)
+
+## 海洋圈层
+
+![image](https://github.com/user-attachments/assets/300769a0-fb31-47e1-8372-426a3c1d593a)
+
+## 区域洋流
+
+![image](https://github.com/user-attachments/assets/9bae4c2c-b1a1-4c31-82ea-0f542d0a947f)
+
+## 森林圈层
+
+![image](https://github.com/user-attachments/assets/dc6e97d1-db33-4f3d-8004-4c0f8652910a)
+
+## 固体地球
+
+![image](https://github.com/user-attachments/assets/ee338e7b-e53e-46ff-9f75-2f0826731e84)
+
 
 # higisx-cesium-js
 基于cesium修改的可视化项目
