@@ -25,13 +25,29 @@
 ![image](https://github.com/user-attachments/assets/713ca3c6-29ef-4274-9d8c-f2dc61057edc)
 
 
+https://github.com/user-attachments/assets/565235a8-b05c-4413-ad62-3f22fdd00032
+
+
+
 ## 大气圈层
 
 ![image](https://github.com/user-attachments/assets/179b6b96-f686-4ebc-901e-3e3b69e54863)
 
+
+https://github.com/user-attachments/assets/667b8f4e-5085-4dbf-a3f6-1d3d680597d6
+
+
+
+https://github.com/user-attachments/assets/cfc649ae-604d-43bb-acae-4fa41614292b
+
+
 ## 海洋圈层
 
 ![image](https://github.com/user-attachments/assets/300769a0-fb31-47e1-8372-426a3c1d593a)
+
+
+https://github.com/user-attachments/assets/7b1869c2-fac5-4749-90ed-880cb3931e7f
+
 
 ## 区域洋流
 
@@ -40,6 +56,10 @@
 ## 森林圈层
 
 ![image](https://github.com/user-attachments/assets/dc6e97d1-db33-4f3d-8004-4c0f8652910a)
+
+
+https://github.com/user-attachments/assets/43816bf4-7e51-4222-bcd1-f569b4db1a64
+
 
 ## 固体地球
 
